@@ -1,8 +1,15 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
 import { Product } from '../entities/product.entity';
-import { Repository } from 'typeorm';
-import { CreateProductDto } from '../dto/product.dto';
+import { Repository } from "typeorm";
+import { CreateProductDto } from "../dto/product.dto";
+
+
+
+
+
+
+
 @Injectable()
 export class ProductsService{
     constructor(
@@ -10,8 +17,8 @@ export class ProductsService{
         private productRepo: Repository<Product>
     ){}
 
-    async create(createProductDto:CreateProductDto){
-        const product = this.productRepo.create(createProductDto);
+    async create(CreateProductDto:CreateProductDto){
+        const product = this.productRepo.create(CreateProductDto);
         await  this.productRepo.save(product);
         return product;
     }
@@ -43,4 +50,5 @@ export class ProductsService{
         const updateProduct = await this.productRepo.merge(oldProduct, cambios);
         return this.productRepo.save(updateProduct);
     }
+
 }

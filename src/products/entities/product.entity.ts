@@ -1,31 +1,50 @@
-import { User } from 'src/users/entities/user.entity';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Product } from "../entities/product.entity";
+import { Repository } from "typeorm";
+import { CreateProductDto } from "../dto/product.dto";
 
-@Entity()
-export class Product {
-  @PrimaryGeneratedColumn({ type: 'int4' })
-  id?: number;
+@Injectable()
+export class ProductsService{
+    constructor(
+        @InjectRepository(Product)
+        private productRepo: Repository<Product>
+    ){}
 
-  @Column({ type: 'varchar', length: 100, nullable: false })
-  name: string;
+    async create(CreateProductDto:CreateProductDto){
+        const product = this.productRepo.create(CreateProductDto);
+        await  this.productRepo.save(product);
+        return product;
+    }
+    //Encontrar un registro
+    findOne(id: number){
+        return this.productRepo.findOne({
+            where:{id},
+            relations:{
+                autor:true
+            }
+        });
+    }
+    //mostrar todos los registros
+    findAll(){
+        return   this.productRepo.find({
+            order: {id: 'ASC'},
+        });
+    }
+    //eliminar un registro
+    async remove(id:number){
+        const product =await this.findOne(id);
+        await this.productRepo.remove(product);
+        return 'Producto eliminado';
+    }
 
-  @Column({ type: 'varchar', length: 300, nullable: false })
-  description: string;
+    //actualizar un registro
+    async update(id: number, cambios: CreateProductDto){
+        const oldProduct = await this.findOne(id);
+        const updateProduct = await this.productRepo.merge(oldProduct, cambios);
+        return this.productRepo.save(updateProduct);
+    }
 
-  @Column({ type: 'int4', nullable: false })
-  price: number;
-
-  @Column({ type: 'int8', nullable: false })
-  stock: number;
-
-  @Column({ type: 'int4', nullable: false })
-  user_id: number;
-
-  @ManyToOne(()=> User)
-  @JoinColumn({
-    name:'user_id',
-    referencedColumnName:'id'
-
-  })
-  autor:User;
 }
+
+export { Product };
